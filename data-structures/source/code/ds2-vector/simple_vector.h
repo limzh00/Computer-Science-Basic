@@ -5,12 +5,51 @@ typedef int Rank; // Rank秩 本质上就是线性表的索引
 class Vector{
 protected:
     Rank _size; int _capacity; int* _elem; // 规模，容量，数据区
-    void copyFrom(int const* A, Rank begin, Rank end); // 复制数组区间A[begin,end)
-    void shrink(); //空间过大的时候要压缩,为其他数据腾出空间
-    void expand(); //空间不足的时候要对向量扩容
-    bool bubble(Rank begin, Rank end); //扫描交换？
-    void bubbleSort(Rank begin, Rank end); // 冒泡排序算法
-    Rank max(Rank begin, Rank end); //选取指定区间的最大元素
-    void selectionSort(Rank begin, Rank end); //选择排序算法
-    
+public:
+    Vector(int capacity, int size, int value);//初始函数（构造函数）
+    ~Vector();//析构函数
+    Rank size() const{return _size;}
+    bool empty() const{return !_size;}
+    void expand();
+    Rank insert(Rank r, int const& e);
+    Rank insert(int const& e){return insert(_size, e);}    
+    int remove(Rank r);
+    int get(Rank r);
 };//注意不要漏掉分号
+
+Vector::Vector(int capacity = DEFAULT_CAPACITY, int size = 0, int value = 0){
+    _capacity = capacity;
+    _size = size;
+    _elem = new int[_capacity];
+    for(int i = 0; i < _capacity; i++) _elem[i] = value;
+}
+
+Vector::~Vector() {delete [] _elem;}
+
+void
+Vector::expand(){
+    if(_size < _capacity) return;
+    if(_capacity < DEFAULT_CAPACITY) _capacity = DEFAULT_CAPACITY;
+    int* oldElem = _elem; _elem = new int[_capacity << 1];
+    for(int i = 0; i < _size; i++) _elem[i] = oldElem[i];
+    delete [] oldElem;
+    _capacity = _capacity << 1;
+}
+
+Rank
+Vector::insert(Rank r, int const& e){
+    expand();
+    for(int i = _size - 1; i >= r; i--) _elem[i+1] = _elem[i];
+    _elem[r] = e; 
+    _size ++;
+} 
+
+int
+Vector::remove(Rank r){
+    for(int i = r; i < _size - 1; i++) _elem[i] = _elem[i+1];
+    _size --;
+}
+
+int
+Vector::get(Rank r){return _elem[r];}
+
