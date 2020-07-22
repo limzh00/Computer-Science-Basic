@@ -10,7 +10,7 @@ private:
     void copyfrom(Vector<T> const& A, Rank begin, Rank end);
 public:
     // constructors
-    Vector(int size, int capacity, int value); // default size, default capcity and filled values if size is non-zero.
+    Vector(int size = 0, int capacity = DEFAULT_CAPACITY, int value = 0); // default size, default capcity and filled values if size is non-zero.
     Vector(Vector<T> const& A, Rank begin, Rank end); // copy a sub-vector [begin, end) from an another vector.
     Vector(Vector<T> const& A); // copy the whole vector from an another one, sharing the same elements.
     // deconstructor
@@ -34,6 +34,7 @@ public:
     // statistical info
     Rank max() const;
     Rank min() const;
+    int size() const;
 
     // operator
     T& operator[](Rank r) const;
@@ -50,13 +51,14 @@ template<class T>
 void
 Vector<T>::copyfrom(Vector<T> const& A, Rank begin, Rank end){
     _elem = new T[_capacity = max(2*(end - begin),DEFAULT_CAPACITY)];
-    for(int i = 0, Rank tmp = begin; i < end - begin;) _elem[i++] = A[tmp++];
+    Rank tmp = begin;
+    for(int i = 0; i < end - begin;) _elem[i++] = A[tmp++];
     _size = end - begin; // update
 }
 
 // constructor default
 template<class T>
-Vector<T>::Vector(int size = 0, int capacity = DEFAULT_CAPACITY, int value = 0){
+Vector<T>::Vector(int size, int capacity, int value){
     _elem = new T[capacity];
     for(int i = 0; i < size; _elem[i++] = value);
     //update
@@ -98,7 +100,7 @@ Vector<T>::find(T const& e) const{
 // expand
 template<class T>
 void
-expand(){
+Vector<T>::expand(){
     if(_size < _capacity) return;
     if(_capacity < DEFAULT_CAPACITY) _capacity = DEFAULT_CAPACITY;
     T* tmp = _elem;
@@ -155,6 +157,12 @@ Vector<T>::min() const{
     return index;
 }
 
+template<class T>
+int 
+Vector<T>::size() const{
+    return _size;
+}
+
 // **************************OPERATORS************************
 template<class T>
 T& 
@@ -179,7 +187,7 @@ Vector<T>::operator+=(Vector<T> const& A){
 }
 
 template<class T>
-Vector<class T>&
+Vector<T>&
 Vector<T>::operator=(Vector<T> const& A){
     T* tmp = _elem;
     _elem = new T[_capacity = A.size() << 1];
