@@ -50,7 +50,7 @@ public:
 template<class T>
 void
 Vector<T>::copyfrom(Vector<T> const& A, Rank begin, Rank end){
-    _elem = new T[_capacity = max(2*(end - begin),DEFAULT_CAPACITY)];
+    _elem = new T[_capacity = 2*(end - begin) > DEFAULT_CAPACITY ? 2*(end - begin): DEFAULT_CAPACITY];
     Rank tmp = begin;
     for(int i = 0; i < end - begin;) _elem[i++] = A[tmp++];
     _size = end - begin; // update
@@ -129,7 +129,7 @@ Vector<T>::insert(T const& e){
 template<class T>
 void
 Vector<T>::remove(Rank r){
-    for(int i = r + 1; i < size() - 1; i++) _elem[i] = _elem[i+1];
+    for(int i = r; i < size() - 1; i++) _elem[i] = _elem[i+1];
     _size --;
 }
 
@@ -142,18 +142,18 @@ Vector<T>::empty() const{return !_size;}
 template<class T>
 Rank
 Vector<T>::max() const{
-    T max = _elem[0]; Rank index;
+    T max = _elem[size() - 1]; Rank index = size() - 1;
     for(int i = size() - 1; i >= 0; i--)
-        if(max > _elem[i]){max = _elem[i]; index = i;}
+        if(max < _elem[i]){max = _elem[i]; index = i;}
     return index;
 }
 
 template<class T>
 Rank
 Vector<T>::min() const{
-    T min = _elem[0]; Rank index;
+    T min = _elem[size() - 1]; Rank index = size() - 1;
     for(int i = size() - 1; i >= 0; i--)
-        if(min < _elem[i]){min = _elem[i]; index = i;}
+        if(min > _elem[i]){min = _elem[i]; index = i;}
     return index;
 }
 
@@ -171,10 +171,10 @@ Vector<T>::operator[](Rank r) const{ return get(r);}
 template<class T>
 Vector<T>
 Vector<T>::operator+(Vector<T> const& A){
-    int tmp_size = A.size() + this -> size();
+    int tmp_size = A.size() + size();
     int tmp_capacity = tmp_size << 1;
     Vector<T> vec(tmp_size, tmp_capacity);
-    for(int i = 0; i < this -> size(); vec[i] = _elem[i++]);
+    for(int i = 0; i < size(); vec[i++] = _elem[i]);
     for(int i = this -> size(), j = 0; i < vec.size(); i++) vec[i] = A[j++];        
     return vec;
 }
@@ -191,8 +191,9 @@ Vector<T>&
 Vector<T>::operator=(Vector<T> const& A){
     T* tmp = _elem;
     _elem = new T[_capacity = A.size() << 1];
-    for(int i = 0; i < A.size(); _elem[i] = A[i++]);
+    for(int i = 0; i < A.size(); _elem[i++] = A[i]);
     _size = A.size(); //update
+    delete [] tmp;
     return *this;
 }
 
