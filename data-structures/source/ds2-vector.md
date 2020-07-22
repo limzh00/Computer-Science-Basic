@@ -1,4 +1,4 @@
-# 数据结构文档(二):向量
+# 数据结构文档(二):向量初探
 
 *Author: Limzh*
 
@@ -12,13 +12,13 @@
 
 本文档涉及的内容已用`对勾`标记。
 
-> - [x] 线性表的定义和基本运算 
+> - [x] 线性表的定义和基本运算
 > - [x] 线性表的顺序存储结构及查找、插入和删除等基本算法的实现
 > - [ ] 线性表的链式存储结构和查找、插入和删除等基本算法的实现
 > - [ ] 循环列表、静态链表和双向链表的基本概念
 > - [ ] 跳表的基本原理
-> - [x] 理解并能选择使用线性结构
-> - [x] 线性表的应用
+> - [ ] 理解并能选择使用线性结构
+> - [ ] 线性表的应用
 
 重点内容：
 
@@ -33,7 +33,7 @@
 
 #### 1.3.1 技术上的认识
 
-各种数据结构都可以看做是由若干数据项组成的集合，同时对若干数据项定义一组标准的操作方法。学习数据结构，不是在学习一个又一个繁杂的数据项和操作，而是在学习设计数据项与数据项之间的层次性——`结构`。而我们凭借什么标准来设计数据与数据的之间的结构呢？又怎么去度量结构的工作效率？结构这个抽线的概念具体又体现在什么地方？这是三个贯穿数据结构学习始终的终极之问。但目前，让我们先大喊一句至理名言，再慢慢体会这种感觉：
+各种数据结构都可以看做是由若干数据项组成的集合，同时对若干数据项定义一组标准的操作方法。学习数据结构，不是在学习一个又一个繁杂的数据项和操作，而是在学习设计数据项与数据项之间的层次性——`结构`。而我们凭借什么标准来设计数据与数据的之间的结构呢？又怎么去度量结构的工作效率？结构这个抽象的概念具体又体现在什么地方？这是三个贯穿数据结构学习始终的终极之问。但目前，让我们先大喊一句至理名言，再慢慢体会这种感觉：
 
 > ​	离散数据间逻辑上、空间上、操作上的关联就是数据结构。
 
@@ -78,7 +78,7 @@ $$
 
 我要记录在脑中的数据是第一个货物的地址，也即是`基地址`，售货员告诉我的第n个货物，也即是`指定货物到基地址的偏差`。给定输入的偏差，第n个货物的位置符合公式
 $$
-A[n] = A_0 + l_0 +l_1+...+l_{n-1} 
+A[n] = A_0 + l_0 +l_1+...+l_{n-1}
 $$
 假如货物之间的尺寸一样，也即符合
 $$
@@ -88,10 +88,154 @@ $$
 
 #### 1.3.3 本质上的认识
 
-离散的数据不可称之为一种结构，但是数据既有逻辑上的数据
+离散的数据不可称之为一种结构，赋予离散数据某种位置关系，便使之成为一种结构体。本质上，
+$$
+A[n] = A_0 + l * n
+$$
+刻画的便是第n个元素和第1个元素之间的位置关系，需要注意的是，逻辑上具有这样位置关系的式子在物理地址上可能不具有这样的位置关系（这也就是我们之后要说的链表）。因此，避免引起混淆，我们要区分逻辑上的数据结构和物理地址上的数据结构。
 
-从上面的例子不难看出，线性表
+线性表的本质关系是:
+$$
+A_0 \rightarrow A_1 \rightarrow A_2 \rightarrow A_3 \rightarrow ... \rightarrow A_{n-1}
+$$
+这是逻辑上的结构，箭头在这里仅仅代表次序！！所以线性表是一种表示元素次序的逻辑数据结构，这种元素次序体现在顺序表的实现中，就是物理地址上的结构：次序近的元素彼此相邻。
 
-## Section2.数据结构的操作方法
+## Section2.顺序表ADT的操作方法
 
-数据结构具有存储数据的功能。
+还是从老李和快递员的例子出发，在这个例子里我们不妨认为快递员是`工程的使用者`，他的脑海里存在的结构是`逻辑上的线性表`，他只在乎对存入货物的操作而不在乎具体的存放、寻址过程。盲人老李是`工程的开发者`，他在乎的是`物理地址上的顺序表的实现`。他们之间通过快递员的口令来实现交互。这个口令我们称之为`接口`。整个仓库（我们不妨叫它`杨光仓库`）就是`顺序表`这一数据结构的一个对象。现在我们分析一下这个数据结构具有什么属性。
+
+- 盲人老李：他只记住了第一个元素的位置、所有元素的数目以及整个仓库的容量。
+- 货物： 按照线性顺序放置的货物。
+
+```cpp
+class Vector{
+private:
+	int* _elem; int _size; int _capacity; //数据区、规模和容量
+public:
+    Vector(int size, int capacity, int value); // 构造函数 （创建时给定规模、容量以及初始化填充的数值）
+    ~Vector(); // 析构函数（销毁该对象）
+};
+```
+
+### 2.1 构造函数
+
+最简单的构造函数就是创建一段连续的物理空间，并且记录这个空间的大小以及填充元素的数目。（想象一下在一片空地上创建一个仓库，我们要记录仓库的大小以及里面元素的数目）。
+
+```cpp
+Vector::Vector(int size = 0, int capacity = 10, int value = 0){
+	_elem = new int[capacity];
+    for(int i = 0; i < size; i++) _elem[i] = value;
+    _size = size;
+    _capacity = capacity;
+}
+```
+
+### 2.2 析构函数
+
+析构函数是释放空间的函数.
+
+```cpp
+Vector::~Vector(){delete [] _elem;}
+```
+
+### 2.3 API接口
+
+一个顺序表至少还需要以下接口
+
+|                 函数                 |                             描述                             |  对象  |
+| :----------------------------------: | :----------------------------------------------------------: | :----: |
+|             `int size()`             |                       返回当前数据规模                       | 顺序表 |
+|           `int get(int r)`           |              给定某一索引r,返回r位置上的元素值               | 顺序表 |
+| `void insert(int r, int const & e)`  | 给定某一索引r，在该位置插入一元素e，并将所有在r之后的元素后移一格 | 顺序表 |
+| `void remove(int r, int const & e)`  |         删除r上的元素，并将所有在r之后的元素前移一格         | 顺序表 |
+| `void replace(int r, int const & e)` |                    用元素e替换掉r上的元素                    | 顺序表 |
+
+在这里请思考，以上这些方法在使用的时候可能会出现一些内存问题，是什么呢？（提示：数组是静态的，向量是动态的）
+
+### 2.4 实现
+
+```cpp
+/*This is a header file containing the implementation
+  of Vector for int type.*/
+#define DEFAULT_CAPACITY 10 // 向量的默认大小
+typedef int Rank; // Rank秩 本质上就是线性表的索引
+class Vector{
+protected:
+    Rank _size; int _capacity; int* _elem; // 规模，容量，数据区
+public:
+    Vector(int capacity, int size, int value);//初始函数（构造函数）
+    ~Vector();//析构函数
+    Rank size() const{return _size;}
+    bool empty() const{return !_size;}
+    void expand();
+    Rank insert(Rank r, int const& e);
+    Rank insert(int const& e){return insert(_size, e);}    
+    int remove(Rank r);
+    int get(Rank r);
+    void replace(Rank r, int const& e);
+};//注意不要漏掉分号
+
+Vector::Vector(int capacity = DEFAULT_CAPACITY, int size = 0, int value = 0){
+    _capacity = capacity;
+    _size = size;
+    _elem = new int[_capacity];
+    for(int i = 0; i < _capacity; i++) _elem[i] = value;
+}
+
+Vector::~Vector() {delete [] _elem;}
+
+void
+Vector::expand(){
+    if(_size < _capacity) return;
+    if(_capacity < DEFAULT_CAPACITY) _capacity = DEFAULT_CAPACITY;
+    int* oldElem = _elem; _elem = new int[_capacity << 1];
+    for(int i = 0; i < _size; i++) _elem[i] = oldElem[i];
+    delete [] oldElem;
+    _capacity = _capacity << 1;
+}
+
+Rank
+Vector::insert(Rank r, int const& e){
+    expand();
+    for(int i = _size - 1; i >= r; i--) _elem[i+1] = _elem[i];
+    _elem[r] = e; 
+    _size ++;
+} 
+
+int
+Vector::remove(Rank r){
+    for(int i = r; i < _size - 1; i++) _elem[i] = _elem[i+1];
+    _size --;
+}
+
+int
+Vector::get(Rank r){return _elem[r];}
+
+void 
+Vector::replace(Rank r, int const& e){
+    _elem[r] = e;
+}
+```
+
+以上是最最最最基础的顺序表，下一文档我们将在这个顺序表的基础上引入算法，并增添新的方法。
+
+### 2.5 练习
+
+- 请问如果你是顺序表的开发者，你会添加什么样的新操作方法？
+
+## Section3. 总结
+
+本文档仅仅是对顺序表的初探，介绍了什么是顺序表以及数据结构的基本思想。基于最粗浅的理解，我们实现了一种最简单的顺序表结构。在接下来的两篇文档里，我们会进一步地完善线性表的操作方法，并引入算法分析的知识，衡量顺序表的工作效能。
+
+本文档最核心的知识归纳如下：
+
+- 终极三问：数据结构的`结构`体现在哪里？ 如何设计并实现一种数据结构(的操作方法)？如何度量数据结构的工作效能？
+- 数据结构分为逻辑上的结构关系和物理实现上的结构关系，线性表是一种逻辑结构，顺序表是对线性表的一种物理实现。
+- 线性表的公式（逻辑结构，重点是`次序`）： $A_0 \rightarrow A_1 \rightarrow A_2 \rightarrow A_3 \rightarrow ... \rightarrow A_{n-1}$
+- 顺序表的公式（物理结构）： $A[n] = A_0 + l_0 +l_1+...+l_{n-1} = A_0 + l * n$
+
+实现代码也已一并放到了附件中，必要时请浏览。
+
+------
+
+<img src="D:\ShanghaiTech\强拆大队队长杨燕如的强拆文件夹\燕如表情包\再见啦.png" style="zoom: 33%;" />

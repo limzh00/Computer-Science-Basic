@@ -15,6 +15,7 @@ public:
     Rank insert(int const& e){return insert(_size, e);}    
     int remove(Rank r);
     int get(Rank r);
+    void replace(Rank r, int const& e);
 };//注意不要漏掉分号
 
 Vector::Vector(int capacity = DEFAULT_CAPACITY, int size = 0, int value = 0){
@@ -53,3 +54,7 @@ Vector::remove(Rank r){
 int
 Vector::get(Rank r){return _elem[r];}
 
+void 
+Vector::replace(Rank r, int const& e){
+    _elem[r] = e;
+}
