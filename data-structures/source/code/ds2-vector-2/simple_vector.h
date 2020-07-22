@@ -27,16 +27,16 @@ public:
     void remove(Rank r);
     // check whether it is empty
     bool empty() const;
-    // sort
-    void bubble_sort();
-    void insertion_sort();
+    // // sort
+    // void bubble_sort();
+    // void insertion_sort();
     
     // statistical info
     Rank max() const;
     Rank min() const;
 
     // operator
-    T& operator[](Rank r);
+    T& operator[](Rank r) const;
     Vector<T> operator+(Vector<T> const& A);
     Vector<T>& operator+=(Vector<T> const& A);
     bool      operator==(Vector<T> const& A);
@@ -99,9 +99,107 @@ Vector<T>::find(T const& e) const{
 template<class T>
 void
 expand(){
-    while (/* condition */)
-    {
-        /* code */
+    if(_size < _capacity) return;
+    if(_capacity < DEFAULT_CAPACITY) _capacity = DEFAULT_CAPACITY;
+    T* tmp = _elem;
+    _elem = new T[_capacity <<= 1];
+    for(int i = 0; i < _size; i++) _elem[i] = tmp[i];
+    delete []tmp;    
+}
+
+// dynamic-add
+template<class T>
+void
+Vector<T>::insert(Rank r, T const& e){
+    expand();
+    for(int i = size() - 1; i >= r; i--) _elem[i+1] = _elem[i];
+    _elem[r] = e;
+    _size ++;
+}
+
+template<class T>
+void
+Vector<T>::insert(T const& e){
+    insert(size(), e);
+}
+
+// remove
+template<class T>
+void
+Vector<T>::remove(Rank r){
+    for(int i = r + 1; i < size() - 1; i++) _elem[i] = _elem[i+1];
+    _size --;
+}
+
+// isempty
+template<class T>
+bool
+Vector<T>::empty() const{return !_size;}
+
+// max() and min()
+template<class T>
+Rank
+Vector<T>::max() const{
+    T max = _elem[0]; Rank index;
+    for(int i = size() - 1; i >= 0; i--)
+        if(max > _elem[i]){max = _elem[i]; index = i;}
+    return index;
+}
+
+template<class T>
+Rank
+Vector<T>::min() const{
+    T min = _elem[0]; Rank index;
+    for(int i = size() - 1; i >= 0; i--)
+        if(min < _elem[i]){min = _elem[i]; index = i;}
+    return index;
+}
+
+// **************************OPERATORS************************
+template<class T>
+T& 
+Vector<T>::operator[](Rank r) const{ return get(r);}
+
+template<class T>
+Vector<T>
+Vector<T>::operator+(Vector<T> const& A){
+    int tmp_size = A.size() + this -> size();
+    int tmp_capacity = tmp_size << 1;
+    Vector<T> vec(tmp_size, tmp_capacity);
+    for(int i = 0; i < this -> size(); vec[i] = _elem[i++]);
+    for(int i = this -> size(), j = 0; i < vec.size(); i++) vec[i] = A[j++];        
+    return vec;
+}
+
+template<class T>
+Vector<T>& 
+Vector<T>::operator+=(Vector<T> const& A){
+    *this = *this + A;
+    return *this;
+}
+
+template<class T>
+Vector<class T>&
+Vector<T>::operator=(Vector<T> const& A){
+    T* tmp = _elem;
+    _elem = new T[_capacity = A.size() << 1];
+    for(int i = 0; i < A.size(); _elem[i] = A[i++]);
+    _size = A.size(); //update
+    return *this;
+}
+
+template<class T>
+bool
+Vector<T>::operator==(Vector<T> const& A){
+    if(size() != A.size()) return false;
+    for(int i = 0; i < size(); i++){
+        if(_elem[i] != A[i]) return false;
     }
-    (_size >= _capacity) 
+    return true;
+}
+
+template<class T>
+bool
+Vector<T>::operator!=(Vector<T> const& A){
+    return !(*this == A);
 }
